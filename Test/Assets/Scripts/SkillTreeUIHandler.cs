@@ -7,7 +7,9 @@ using Rewired;
 public class SkillTreeUIHandler : MonoBehaviour {
 
 	public GameObject buttonParent;
-	public Image cursor;
+	public Image cursorImage;
+	public Text currentOrbsText;
+	public Text orbCostsText;
 
 	public List<Image> buttonArr;
 	public List<int> skillUpgradeCurrent;
@@ -18,8 +20,16 @@ public class SkillTreeUIHandler : MonoBehaviour {
 		5, 4, 4, 5, 1, 5, 3, 4,
 		1, 1, 1, 4, 1, 1
 	});
+	private List<int> skillCosts = new List<int>(new int[] {
+		1, 1, 1, 2, 2, 2, 1, 2,
+		2, 1, 4,
+		1, 1, 2, 3, 0, 3, 2, 1,
+		2, 1, 2, 3, 1, 3, 2, 2,
+		5, 5, 5, 1, 5, 5
+	});
 
 	private int currentIndex = 15;
+	private int currentOrbs = 200;
 
 
 	private void Awake() {
@@ -42,6 +52,7 @@ public class SkillTreeUIHandler : MonoBehaviour {
 		// This "skill" is already activated – because it's not really a skill but the class the player chose
 		skillUpgradeCurrent[currentIndex] = 1;
 
+		DisplayOrbs();
 		DisplayActivations();
 	}
 
@@ -49,7 +60,7 @@ public class SkillTreeUIHandler : MonoBehaviour {
 	private void Update() {
 		GetInput();
 
-		DisplayCursor();
+		DisplayCursorImage();
 	}
 
 
@@ -71,13 +82,21 @@ public class SkillTreeUIHandler : MonoBehaviour {
 		}
 
 		if (ReInput.players.GetPlayer(0).GetButtonDown("X")) {
-			ActivateSkill();
+			if (skillCosts[currentIndex] <= currentOrbs) {
+				ActivateSkill();
+			} else {
+				print("Not enough ORBS");
+			}
 		}
 	}
 
 
-	private void DisplayCursor() {
-		cursor.transform.position = buttonArr[currentIndex].transform.position;
+	private void DisplayCursorImage() {
+		// Display cursor at the right position
+		cursorImage.transform.position = buttonArr[currentIndex].transform.position;
+
+		// Show ORB costs for this skill
+		orbCostsText.text = skillCosts[currentIndex] + "";
 	}
 
 
@@ -86,14 +105,29 @@ public class SkillTreeUIHandler : MonoBehaviour {
 			if (skillUpgradeCurrent[currentIndex] < skillUpgradeMax[currentIndex]) {
 				skillUpgradeCurrent[currentIndex]++;
 
+				PayOrbs();
+				DisplayOrbs();
 				ActivateNext();
 				DisplayActivations();
+				CalculateNewCosts();
 			} else {
 				print("Already activated!");
 			}
 		} else {
 			print("This skill is locked");
 		}
+	}
+
+
+	private void PayOrbs() {
+		// Subtract ORBS
+		currentOrbs -= skillCosts[currentIndex];
+	}
+
+
+	private void DisplayOrbs() {
+		// Update ORBS count
+		currentOrbsText.text = currentOrbs + "";
 	}
 
 
@@ -213,6 +247,136 @@ public class SkillTreeUIHandler : MonoBehaviour {
 		// Set the selected skill to "done"
 		if (skillUpgradeCurrent[currentIndex] == skillUpgradeMax[currentIndex]) {
 			buttonArr[currentIndex].transform.GetChild(0).GetComponent<Image>().color = new Color32(255, 0, 0, 255);
+		}
+	}
+
+
+	private void CalculateNewCosts() {
+		// Skill 00 / 01 / 02 – HP / Damage / Defense
+		for (int i = 0; i < 3; i++) {
+			if (skillUpgradeCurrent[i] == 2) {
+				skillCosts[i] = 2;
+			}
+			if (skillUpgradeCurrent[i] == 4) {
+				skillCosts[i] = 3;
+			}
+		}
+
+		// Skill 03 – Time Upgrade – NOT NEEDED
+		// Skill 04 – Chaos Upgrade – NOT NEEDED
+		// Skill 05 – Venom Upgrade – NOT NEEDED
+
+		// Skill 06 – Move Speed
+		if (skillUpgradeCurrent[6] == 2) {
+			skillCosts[6] = 2;
+		}
+		if (skillUpgradeCurrent[6] == 4) {
+			skillCosts[6] = 3;
+		}
+
+		// Skill 07 – Single Jump – NOT NEEDED
+
+		// Skill 08 – Weapon Upgrades
+		if (skillUpgradeCurrent[8] == 1) {
+			skillCosts[8] = 3;
+		}
+		if (skillUpgradeCurrent[8] == 3) {
+			skillCosts[8] = 4;
+		}
+		if (skillUpgradeCurrent[8] == 4) {
+			skillCosts[8] = 5;
+		}
+
+		// Skill 09 – Attack Speed
+		if (skillUpgradeCurrent[9] == 2) {
+			skillCosts[9] = 2;
+		}
+		if (skillUpgradeCurrent[9] == 4) {
+			skillCosts[9] = 3;
+		}
+
+		// Skill 10 – Double Jump – NOT NEEDED
+		// Skill 11 – Enable Crit – NOT NEEDED
+		// Skill 12 – Enable Dodge – NOT NEEDED
+		// Skill 13 – Enable Respawn – NOT NEEDED
+		// Skill 14 – Skill One – NOT NEEDED
+		// Skill 15 – Character Class – NOT NEEDED
+		// Skill 16 – Skill Two – NOT NEEDED
+		// Skill 17 – Enable Orb Finding – NOT NEEDED
+		// Skill 18 – Enable Apple Finding – NOT NEEDED
+
+		// Skill 19 – Improve Crit
+		if (skillUpgradeCurrent[19] == 2) {
+			skillCosts[19] = 3;
+		}
+		if (skillUpgradeCurrent[19] == 4) {
+			skillCosts[19] = 4;
+		}
+
+		// Skill 20 – Improve Dodge
+		for (int j = 1; j < 4; j++) {
+			if (skillUpgradeCurrent[20] == j) {
+				skillCosts[20] = j+1;
+			}
+		}
+
+		// Skill 21 – Improve Respawn
+		if (skillUpgradeCurrent[21] == 1) {
+			skillCosts[21] = 3;
+		}
+		if (skillUpgradeCurrent[21] == 3) {
+			skillCosts[21] = 4;
+		}
+
+		// Skill 22 – Improve Skill One
+		if (skillUpgradeCurrent[22] == 2) {
+			skillCosts[22] = 4;
+		}
+		if (skillUpgradeCurrent[22] == 4) {
+			skillCosts[22] = 5;
+		}
+
+		// Skill 18 – Enable Rage Mode – NOT NEEDED
+
+		// Skill 24 – Improve Skill Two
+		if (skillUpgradeCurrent[24] == 2) {
+			skillCosts[24] = 4;
+		}
+		if (skillUpgradeCurrent[24] == 4) {
+			skillCosts[24] = 5;
+		}
+
+		// Skill 25 – Improve Orb Finding
+		for (int k = 1; k < 3; k++) {
+			if (skillUpgradeCurrent[25] == k) {
+				skillCosts[25] = k+2;
+			}
+		}
+
+		// Skill 26 – Improve Apple Finding
+		if (skillUpgradeCurrent[26] == 2) {
+			skillCosts[26] = 3;
+		}
+
+		// Skill 27 – Perfect Crit – NOT NEEDED
+		// Skill 28 – Perfect Dodge – NOT NEEDED
+		// Skill 29 – Perfect Respawn – NOT NEEDED
+
+		// Skill 30 – Improve Rage Mode – NOT NEEDED
+		for (int l = 1; l < 4; l++) {
+			if (skillUpgradeCurrent[30] == l) {
+				skillCosts[30] = l+1;
+			}
+		}
+
+		// Skill 31 – Perfect Orb Finding – NOT NEEDED
+		// Skill 31 – Perfect Apple Finding – NOT NEEDED
+
+		// Set all completed skills to 0 costs
+		for (int m = 0; m < buttonArr.Count; m++) {
+			if (skillUpgradeCurrent[m] == skillUpgradeMax[m]) {
+				skillCosts[m] = 0;
+			}
 		}
 	}
 
