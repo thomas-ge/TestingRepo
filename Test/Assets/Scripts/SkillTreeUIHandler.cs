@@ -83,7 +83,7 @@ public class SkillTreeUIHandler : MonoBehaviour {
 
 		if (ReInput.players.GetPlayer(0).GetButtonDown("X")) {
 			if (skillCosts[currentIndex] <= currentOrbs) {
-				ActivateSkill();
+				SkillActivationProcess();
 			} else {
 				print("Not enough ORBS");
 			}
@@ -100,12 +100,15 @@ public class SkillTreeUIHandler : MonoBehaviour {
 	}
 
 
-	private void ActivateSkill() {
+	private void SkillActivationProcess() {
 		if (skillUpgradeCurrent[currentIndex] >= 0) {
 			if (skillUpgradeCurrent[currentIndex] < skillUpgradeMax[currentIndex]) {
+
+				// Increase the selected skill in the array
 				skillUpgradeCurrent[currentIndex]++;
 
 				PayOrbs();
+				GetComponent<SkillHandler>().ActivateSkill(skillUpgradeCurrent, currentIndex);
 				DisplayOrbs();
 				ActivateNext();
 				DisplayActivations();
@@ -336,7 +339,7 @@ public class SkillTreeUIHandler : MonoBehaviour {
 			skillCosts[22] = 5;
 		}
 
-		// Skill 18 – Enable Rage Mode – NOT NEEDED
+		// Skill 23 – Enable Rage Mode – NOT NEEDED
 
 		// Skill 24 – Improve Skill Two
 		if (skillUpgradeCurrent[24] == 2) {
@@ -370,7 +373,7 @@ public class SkillTreeUIHandler : MonoBehaviour {
 		}
 
 		// Skill 31 – Perfect Orb Finding – NOT NEEDED
-		// Skill 31 – Perfect Apple Finding – NOT NEEDED
+		// Skill 32 – Perfect Apple Finding – NOT NEEDED
 
 		// Set all completed skills to 0 costs
 		for (int m = 0; m < buttonArr.Count; m++) {
